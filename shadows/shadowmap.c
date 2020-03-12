@@ -1,20 +1,24 @@
+#define PY_SSIZE_T_CLEAN
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-/*  Helper functions adapted from
-    http://wiki.scipy.org/Cookbook/C_Extensions/NumPy_arrays */
+/* -------------------------------------------------------------------------- */
+
+static PyObject *shadowmap_calculate(PyObject*, PyObject*);
+
+/* -------------------------------------------------------------------------- */
 
 static int is_floatmatrix(PyArrayObject *mat) {
     if (PyArray_TYPE(mat) != NPY_DOUBLE || PyArray_NDIM(mat) != 2)  {
-        printf("%d\n", PyArray_TYPE(mat));
         PyErr_SetString(PyExc_ValueError,
             "Array must be of type Float and 2 dimensional.");
         return 0;
     }
-
     return 1;
 }
+
+/* -------------------------------------------------------------------------- */
 
 static double **ptrvector(long n)  {
     double **v;
@@ -26,11 +30,15 @@ static double **ptrvector(long n)  {
     return v;
 }
 
+/* -------------------------------------------------------------------------- */
+
 static void free_Carrayptrs(double **v)  {
     free((char*) v);
 }
 
-static double **pymatrix_to_Carrayptrs(PyArrayObject *arrayin)  {
+/* -------------------------------------------------------------------------- */
+
+static double **pymatrix_to_Carrayptrs(PyArrayObject *arrayin) {
     double **c, *a;
     int i,n,m;
     npy_intp *dims = PyArray_DIMS(arrayin);
@@ -45,17 +53,22 @@ static double **pymatrix_to_Carrayptrs(PyArrayObject *arrayin)  {
     return c;
 }
 
+/* -------------------------------------------------------------------------- */
+
 static PyObject *shadowmap_calculate(PyObject *self, PyObject *args) {
     PyArrayObject *heightmap_arr, *shadowmap_arr;
     double sun_x, sun_y, sun_z, view_alt, z_max, x, y, z;
     double **shadowmap, **heightmap;
     npy_intp *dims;
     int i, j, lit;
+    
+    Py_Initialize();     
+    import_array(); 
 
     if (!PyArg_ParseTuple(args, "O!ddddd", &PyArray_Type, &heightmap_arr,
         &sun_x, &sun_y, &sun_z, &view_alt, &z_max)) {
         return NULL;
-    }
+    } 
 
     if (heightmap_arr == NULL || !is_floatmatrix(heightmap_arr)) {
         return NULL;
@@ -74,7 +87,7 @@ static PyObject *shadowmap_calculate(PyObject *self, PyObject *args) {
             z = heightmap[i][j] + view_alt;
             lit = 1;
 
-            while (x >= 0 && x < dims[0] && y >= 0 && y < dims[1] && z <= z_max) {
+            while (x >= 0 && x < dims[1] && y >= 0 && y < dims[0] && z <= z_max) {
                 if (z < heightmap[(int)y][(int)x]) {
                     lit = 0;
                     break;
@@ -94,13 +107,30 @@ static PyObject *shadowmap_calculate(PyObject *self, PyObject *args) {
     return PyArray_Return(shadowmap_arr);
 }
 
+/* -------------------------------------------------------------------------- */
+
 static PyMethodDef ShadowMapMethods[] = {
     {"calculate",  shadowmap_calculate, METH_VARARGS,
      "Calculate a shadowmap."},
-    {NULL, NULL, 0, NULL}        /* Sentinel */
+     {NULL}
 };
 
-PyMODINIT_FUNC initc_shadowmap(void) {
-    (void) Py_InitModule("c_shadowmap", ShadowMapMethods);
-    import_array();  // Must be present for NumPy.  Called first after above line.
+/* -------------------------------------------------------------------------- */
+
+static struct PyModuleDef c_shadowmap =
+{
+  PyModuleDef_HEAD_INIT,
+  "c_shadowmap",
+  NULL,
+  -1,
+  ShadowMapMethods
+  };
+
+/* -------------------------------------------------------------------------- */
+
+PyMODINIT_FUNC PyInit_c_shadowmap(void){ 
+  import_array();
+  return PyModule_Create(&c_shadowmap);
 }
+
+/* -------------------------------------------------------------------------- */

@@ -1,3 +1,5 @@
-*.pyc
-venv/
-data/
+build/
+dist/
+scripts/
+shadow_mapper_andrea.pinna.egg-info/
+shadows/__pycache__/
