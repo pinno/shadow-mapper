@@ -24,22 +24,17 @@ python setup.py install
 
 ```python
 from datetime import datetime
-import numpy as np
-import os
-from shadows.shadowmap import ShadowMap
 from shadows.raster import Raster
-
-# Path to the elevation raster file
-raster_file = 'DEM_RASTER.ASC'
+from shadows.shadowmap import ShadowMap
 
 # Instantiate Raster object
-dem = Raster(filename=raster_file)
+dem = Raster(filename='DEM_RASTER.ASC')
 
 # Time in UTC
 t = datetime.now()
 
 # Compute shading
-sm = ShadowMap(dem=dem, date_time=t, view_height=0.0)
+sm = ShadowMap(dem=dem, date_time=t)
 
 # Save image as PNG file
 sm.to_image().save('SHADOW_MAP.PNG')
