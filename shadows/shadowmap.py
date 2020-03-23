@@ -7,13 +7,11 @@ shade at a given time.
 
 # ---------------------------------------------------------------------------- #
 
-import astropy.coordinates as coords
-import astropy.units as u
-from astropy.time import Time
 from dataclasses import dataclass
 from datetime import datetime
-from math import cos, sin
+from math import cos, sin, radians
 from numpy import float64, uint8
+from pvlib.solarposition import get_solarposition
 from PIL import Image
 from sys import exit
 from . import raster
@@ -44,26 +42,23 @@ class ShadowMap:
         """
         Compute the sun position in the sky for a given time and location.
         """
-        location_coords = coords.EarthLocation(lon=self.dem.lng * u.deg,
-                                               lat=self.dem.lat * u.deg)
-        location_time = Time(self.date_time)
-        angles = coords.AltAz(location=location_coords, obstime=location_time)
-        sun = coords.get_sun(location_time)
-        sun_altitude = sun.transform_to(angles).alt.radian
-        sun_azimuth = sun.transform_to(angles).az.radian
-        self.sun_x = sin(sun_azimuth) * cos(sun_altitude)
-        self.sun_y = -cos(sun_azimuth) * cos(sun_altitude)
-        self.sun_z = sin(sun_altitude) * self.dem.resolution
+        sp = get_solarposition(self.date_time, self.dem.lat, self.dem.lng)
+        self.altitude = radians(sp['elevation'])
+        self.azimuth = radians(sp['azimuth'])
+        self.sun_x = sin(self.azimuth) * cos(self.altitude)
+        self.sun_y = -cos(self.azimuth) * cos(self.altitude)
+        self.sun_z = sin(self.altitude) * self.dem.resolution
 
     # ------------------------------------------------------------------------ #
 
-    def compute(self):
+    def compute(self, data_type = uint8):
         """
         Compute which pixels of the elevation raster are lit or not.
         """
         return c_shadowmap.calculate(self.dem.elevation_map,
                                      self.sun_x, self.sun_y, self.sun_z,
-                                     self.view_height, self.dem.max_elevation)
+                                     self.view_height,
+                                     self.dem.max_elevation).astype(uint8)
 
     # ------------------------------------------------------------------------ #
 

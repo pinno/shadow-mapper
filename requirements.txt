@@ -1,4 +1,4 @@
 Pillow==7.0.0
-astropy==4.0
 numpy==1.18.1
-rasterio=1.1.1
+pvlib==0.7.1
+rasterio==1.1.1

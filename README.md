@@ -9,9 +9,9 @@ This software is a lightweight version of [shadow-mapper](https://github.com/per
 It works with [Python 3.7](https://www.python.org/). The following libraries are needed:
 
 * [Pillow (7.0.0)](https://python-pillow.org/)
-* [astropy  (4.0)](https://www.astropy.org/)
 * [numpy (1.18.1)](https://numpy.org/)
-* [rasterio (1.1.1)](https://rasterio.readthedocs.io/en/latest/)
+* [pvlib (0.7.1)](https://pvlib-python.readthedocs.io/)
+* [rasterio (1.1.1)](https://rasterio.readthedocs.io/)
 
 The software can be installed under a virtual environment, although it isn't strictly necessary.
 
