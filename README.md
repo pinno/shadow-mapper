@@ -99,13 +99,13 @@ for week in range(1, 53):
 ```
 
 ```sh
-# Create a video animation of the above weekly cumulative sums of shadows:
+# Create a video animation of the above weekly cumulative sums of shadows
 ffmpeg -r 2 -i example/shadows_sum_week_%2d.png -vcodec libx264 -y -an example/shadow_map_video.mp4 -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2"
 ```
 
 ## Example 3
 
-The following procedure illustrates how the ShadowIndex class has been used to compute the shadows exclusively for the raster pixels within the building boundaries, i.e. a small fraction of the total pixels, as also shown in the paper [A procedure for complete census estimation of rooftop photovoltaic potential in urban areas](https://www.mdpi.com/journal/smartcities) published for the journal [Smart Cities](https://www.mdpi.com/journal/smartcities).
+The following procedure illustrates how the ShadowIndex class has been used to compute the shadows exclusively for the raster pixels within the building boundaries, i.e. a small fraction of the total pixels, as also shown in the paper [A procedure for complete census estimation of rooftop photovoltaic potential in urban areas](https://www.mdpi.com/2624-6511/3/3/45) published for the journal [Smart Cities](https://www.mdpi.com/journal/smartcities).
 
 ```python
 import fiona
